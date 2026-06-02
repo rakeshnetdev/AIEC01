@@ -77,6 +77,7 @@ Your instructors, peer supporters, and AI Makerspace staff will serve as your yo
 - [Juan Ovalle](https://www.linkedin.com/in/jjmov/?skipRedirect=true), Peer Supporter (International)
 - [Ovo Okpubuluku](https://www.linkedin.com/in/ovokpus/), Peer Supporter
 - [Raphael Blankson](https://www.linkedin.com/in/raphaelblankson/), Peer Supporter
+- [Phil Mui](https://www.linkedin.com/in/philmui/), Peer Supporter
 - [Don Branson](https://www.linkedin.com/in/donbranson/), Grading Manager & Peer Supporter
 - ["Coach Mark" Walker](https://www.linkedin.com/in/mark-l-walker/), Student Success Manager @ AI Makerspace & Peer Supporter
 - [Todd Deshane](https://www.linkedin.com/in/toddllm/), 1:1 Support Manager @ AI Makerspace
