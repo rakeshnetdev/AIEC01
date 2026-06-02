@@ -84,16 +84,20 @@ It's easy to find your way around in our course within the Discord community:
 
 ---
 
-## 🧑‍🤝‍🧑 Peer Supporters
+## 🧑‍🤝‍🧑 Your v1.0 Team
 
-Your peer supporters will be your [guides](https://curiouslionlearning.com/why-group-learning/#Two_Types_of_Groups_Journey_and_Destination) throughout the cohort! Learn more about each peer supporter below!
+Your instructors, peer supporters, and AI Makerspace staff will serve as your your guides throughout the cohort! Learn more about everyone below!
 
-- [Mark Walker](https://absorbing-toaster-713.notion.site/Mark-Walker-21ccd547af3d80e09e8ee040254e6417?pvs=74)
-- [Don Branson](https://absorbing-toaster-713.notion.site/Don-Branson-1c8cd547af3d80e9a221d62d2ddc4036?pvs=74)
-- [Ovo Okpubuluku](https://absorbing-toaster-713.notion.site/Ovo-Okpubuluku-264cd547af3d80bc862bc3809079f066?pvs=74)
-- [Juan Ovalle](https://absorbing-toaster-713.notion.site/Juan-Ovalle-4508b519a332484d8736ab243aa9fd00?pvs=74)
-- [Todd Deshane](https://absorbing-toaster-713.notion.site/Todd-Deshane-c18ecdb96e2c4afaafaa7aad522fa1a3?pvs=74)
-- Raphael Blankson
+- [Raul Padua](https://www.linkedin.com/in/raulpadua/), Lead Concepts Instructor
+- [Can Temizyurek](https://www.linkedin.com/in/cantemizyurek/), Lead Coding Instructor
+- ["Coach Mark" Walker](https://www.linkedin.com/in/mark-l-walker/), Student Success Manager & Peer Supporter
+- [Todd Deshane](https://www.linkedin.com/in/toddllm/), 1:1 Support Manager
+- [Don Branson](https://www.linkedin.com/in/donbranson/), Grading Manager & Peer Supporter
+- [Ovo Okpubuluku](https://www.linkedin.com/in/ovokpus/), Peer Supporter
+- [Juan Ovalle](https://www.linkedin.com/in/jjmov/?skipRedirect=true), Peer Supporter
+- [Raphael Blankson](https://www.linkedin.com/in/raphaelblankson/), Peer Supporter
+- [Jacob Kilpatrick](https://www.linkedin.com/in/jacobkilpatrickai/), Course Operations Lead @ AI Makerspace
+- [Dr. Greg Loughnane](https://www.linkedin.com/in/gregloughnane/), Owner/CEO @ AI Makerspace
 
 ---
 
