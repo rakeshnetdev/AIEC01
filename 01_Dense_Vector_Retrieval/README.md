@@ -177,4 +177,4 @@ git push origin main
 4. Answer the questions in this `README.md`.
 5. Add, commit, and push your modified work to your origin repository.
 
-When submitting your homework, provide the GitHub URL to your AIE9 repo.
+When submitting your homework, provide the GitHub URL to your AIEC01 repo.
