@@ -15,7 +15,7 @@ from mcp.shared.auth import OAuthClientInformationFull, OAuthClientMetadata, OAu
 from pydantic import AnyUrl
 
 
-DEFAULT_SERVER_URL = "http://localhost:8000"
+DEFAULT_SERVER_URL = "http://localhost:6060"
 DEFAULT_MODEL = "gpt-5.4-mini"
 SYSTEM_PROMPT = """You are a helpful Cat Shop assistant.
 
