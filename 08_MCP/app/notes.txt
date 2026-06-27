@@ -1,0 +1,29 @@
+Here are the steps to expose your server publicly using  ngrok  and run the client:                              
+                                                                                                                   
+  ### Step 1: Start the ngrok Tunnel                                                                               
+                                                                                                                   
+  In a new terminal window, start a tunnel targeting the server's port ( 6060 ):                                   
+                                                                                                                   
+    ngrok http 6060                                                                                                
+                                                                                                                   
+  This will generate a public URL. For example:                                                                    
+   https://xxxx-xx-xx-xx-xx.ngrok-free.app                                                                         
+  ──────                                                                                                           
+  ### Step 2: Start the MCP Server with the ngrok URL                                                              
+                                                                                                                   
+  Start your server while passing the  ISSUER_URL  environment variable matching your ngrok public URL:            
+                                                                                                                   
+    ISSUER_URL=https://xxxx-xx-xx-xx-xx.ngrok-free.app uv run server.py                                            
+    ──────                                                                                                         
+  ### Step 3: Run the Client pointing to ngrok                                                                     
+                                                                                                                   
+  Run the client and pass the ngrok URL as the  --server-url  parameter:                                           
+                                                                                                                   
+    uv run client.py --server-url https://xxxx-xx-xx-xx-xx.ngrok-free.app                                          
+                                                                                                                   
+  The client will automatically print the authorized login URL using the public ngrok domain:                      
+                                                                                                                   
+    Sign in to Cat Shop: https://xxxx-xx-xx-xx-xx.ngrok-free.app/authorize?...                                     
+    
+
+──────────
