@@ -155,7 +155,26 @@ Why is OAuth important for MCP servers, and what security considerations should 
 
 #### Answer
 
-_(insert your answer here)_
+##### Why OAuth is Important for MCP Servers?
+      • Identity Mapping: Standard local connections (like  stdio ) treat all commands as coming from a
+      single operator. However, public HTTP-based servers are globally exposed. OAuth provides a       
+      mechanism to verify who is calling a tool (e.g. mapping  view_cart  or  checkout  to specific    
+      database records for a logged-in user).                                                          
+      • Delegated Authority (Scopes): Rather than giving an AI full write/modify privileges to         
+      everything, OAuth scopes (like  read ,  write ) allow users to grant limited permissions.        
+      • Credential Isolation: The client never sees the user's password; instead, it receives a short- 
+      lived access token that can be easily revoked. 
+
+##### Exposing Tools to AI Clients: Security Considerations:
+      • Indirect Prompt Injection: Because AI models parse external untrusted text (like emails,       
+      reviews, or chat inputs), they can be manipulated into executing tools with harmful arguments (e.
+      g., ordering items, clearing a cart).                                                            
+      • Human-in-the-Loop Validation: Sensitive operations (such as checkout, transaction processing,  
+      or database deletion) must require manual user authorization rather than letting the AI complete 
+      the pipeline autonomously.                                                                       
+      • Strict Input & Scope Checks: The MCP server must enforce strict sanitization of parameters     
+      (checking types, constraints, ranges) and validate incoming token authorization scopes.   
+
 
 ### Question #2
 
@@ -163,11 +182,18 @@ What is Streamable HTTP transport in MCP, and why might you expose a server publ
 
 #### Answer
 
-_(insert your answer here)_
+Streamable HTTP replaces legacy SSE as the modern standard for remote MCP servers by consolidating bidirectional communication into a single HTTP POST endpoint (typically /mcp), instead of juggling separate connections, the server dynamically answers each request with a single JSON object or a scoped SSE stream by mimicking standard web traffic, it is more reliable, firewall-friendly, and seamlessly integrates with existing load balancers and proxies
+
+You would expose an MCP server publicly using Streamable HTTP instead of a local stdio connection when your AI agent needs to access remote resources over the internet, such as cloud-based tools, multi-user enterprise databases, or services hosted behind an API gateway.
+
+Local stdio relies on direct process communication via standard input/output channels, which makes it ideal for zero-latency interactions only when the client and server are running on the same local machine
+However, the moment you transition to Streamable HTTP to enable remote access, the server is exposed over the network, opening up your sensitive tools and data to potential attackersm, this is why integrating OAuth 2.1 is critical for public deployments: it acts as a robust security layer that safely handles dynamic agent registration, strict token validation, and multi-tenant access control, ensuring that only authorized clients can reach your infrastructure
 
 ## Activity 1: Extend the MCP Server
 
 Add at least one new tool to the cat shop MCP server (e.g., `search_products`, `update_cart_quantity`, or `get_order_history`). Ensure the new tool integrates properly with the existing database and OAuth authentication. Demo the new tool through an MCP client and include it in your Loom video.
+
+- Added get_order_history in tools.py
 
 ## Advanced Activity: Build a Custom MCP Client
 
