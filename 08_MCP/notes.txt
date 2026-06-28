@@ -1,0 +1,124 @@
+In production environments, the Model Context Protocol (MCP) standardizes client-server          
+  communication using JSON-RPC 2.0 messages sent over two primary official transport protocols.    
+                                                                                                   
+  Here is how real-time production MCP servers and clients communicate:                            
+  ──────                                                                                           
+  ### 1. The Message Protocol: JSON-RPC 2.0                                                        
+                                                                                                   
+  No matter which network or system transport is used, all communications must follow the JSON-RPC 
+  2.0 specification.                                                                               
+                                                                                                   
+  • Requests & Responses: The client requests a tool invocation (e.g.,  tools/call ) with          
+  parameters, and the server returns a result.                                                     
+  • Notifications: One-way messages (e.g., progress logging, status updates) sent without expecting
+  a response.                                                                                      
+  ──────                                                                                           
+  ### 2. Standard Production Transports                                                            
+                                                                                                   
+  #### A. Local Subprocess (stdio)                                                                 
+                                                                                                   
+  For local developer desktops and IDE integrations (like the Claude Desktop App or Cursor), the   
+  standard communication is over standard input/output streams (stdio).                            
+                                                                                                   
+  • How it works: The client launches the server script/binary as a child process. The client      
+  writes JSON-RPC strings to the server's  stdin  (input) and reads the responses from the server's
+  stdout  (output).                                                                                
+  • When to use: Local tool execution, file scanning, and terminal automation where client and     
+  server live on the same machine.                                                                 
+                                                                                                   
+  #### B. Remote Web Service (Server-Sent Events / SSE)                                            
+                                                                                                   
+  For production SaaS platforms, multi-tenant cloud architectures, and integrations across the web,
+  the official standard is Streamable HTTP via Server-Sent Events (SSE).                           
+                                                                                                   
+  • How it works:                                                                                  
+      1. Handshake (GET): The client makes an HTTP  GET  request to the server's  /sse  or  /mcp   
+      endpoint to establish a persistent, one-way Server-Sent Events stream (server to client).    
+      2. Session ID: The server returns a unique  Session ID  via the SSE stream.                  
+      3. Requests (POST): The client sends subsequent JSON-RPC requests (client to server) as      
+      standard HTTP  POST  requests, referencing the  Session ID  in query parameters or headers.  
+  • When to use: Remote deployment, hosting tools in the cloud, serving multiple users             
+  simultaneously, or integrating with OAuth authorization servers.                                 
+                                                                                                   
+  #### C. WebSockets (Community Standard)                                                          
+                                                                                                   
+  Though not officially core to the initial protocol specification, WebSockets are widely adopted  
+  in production for real-time applications.                                                        
+                                                                                                   
+  • How it works: Client and server open a persistent, full-duplex TCP socket connection, enabling 
+  low-latency, bidirectional messages on a single connection.                                      
+  • When to use: Highly interactive applications where both client and server need to send high-   
+  frequency events back and forth.
+  ──────
+  ### 3. Production Transport Comparison
+  
+   Transport Chann… │ Transport Layer  │ Directionality    │ Auth Method       │ Ideal Environment
+  ──────────────────┼──────────────────┼───────────────────┼───────────────────┼───────────────────
+   stdio            │ OS Pipes ( stdin │ Bidirectional     │ Local System      │ Desktop IDEs /
+                    │ / stdout )       │                   │ Rights            │ Local CLI tools
+   SSE + HTTP POST  │ HTTP/1.1 or      │ Server-to-Client  │ OAuth 2.0 Bearer  │ Production SaaS,
+                    │ HTTP/2           │ (SSE) + Client-   │ Tokens            │ Cloud Agents,
+                    │                  │ to-Server (POST)  │                   │ Multi-User Tools
+   WebSockets       │ TCP socket       │ Bidirectional     │ JWT / Bearer      │ Real-time chat
+                    │                  │ (Full Duplex)     │ Tokens            │ consoles, high-
+                    │                  │                   │                   │ frequency
+                    │                  │                   │                   │ dashboard agents
+  ──────
+
+
+
+##### client.py
+
+  In client.py, the exact same HTTP GET (for  In client.py, the exact same HTTP GET (for SSE) and HTTP POST (for tool calls) requests are 
+  happening under the hood, but they are delegated to LangChain’s  MultiServerMCPClient  adapter.  
+                                                                                                   
+  Here is how it is structured step-by-step:                                                       
+                                                                                                   
+  ### 1. Transport Handshake (HTTP GET)                                                            
+                                                                                                   
+  When you define the server configuration in  client.py :                                         
+                                                                                                   
+    mcp_client = MultiServerMCPClient(                                                             
+        {                                                                                          
+            "cat_shop": {                                                                          
+                "transport": "streamable_http",                                                    
+                "url": mcp_url,                                                                    
+                "auth": oauth,                                                                     
+            }                                                                                      
+        }                                                                                          
+    )                                                                                              
+                                                                                                   
+  The  MultiServerMCPClient  reads the config  transport: "streamable_http" . Under the hood, it   
+  instantiates the Python MCP SDK's client modules and fires the HTTP GET request to  /mcp  to     
+  establish the persistent SSE stream.                                                             
+  ──────                                                                                           
+  ### 2. Discovering Tools                                                                         
+                                                                                                   
+  When you fetch the tools:                                                                        
+                                                                                                   
+    tools = await mcp_client.get_tools()                                                           
+                                                                                                   
+  The adapter makes an initial HTTP POST containing a  tools/list  request, converts the JSON-RPC  
+  tool schemas returned by the server into LangChain-compatible Tool classes, and binds them to the
+  LLM agent.                                                                                       
+  ──────                                                                                           
+  ### 3. Executing Tools (HTTP POST)                                                               
+  
+  When you chat with the agent and it decides to invoke a tool (e.g. adding items to the cart):    
+  
+  1. The  ChatOpenAI  LLM outputs a tool invocation command:  call: add_to_cart(product_id=1) .    
+  2. LangChain intercepts this call and invokes the bound tool wrapper.
+  3. The wrapper forwards the parameters to the adapter, which executes:
+    # Happening internally inside langchain-mcp-adapters
+    await mcp_client.call_tool("cat_shop", "add_to_cart", {"product_id": 1})
+  
+  4. This sends the JSON-RPC tool call payload as an HTTP POST request, waits for the response on  
+  the SSE stream, and feeds the output back into the LLM.
+  
+  ### Summary
+  
+  • In  custom_client.py , you are the orchestrator: you write the sequential  call_tool()         
+  statements directly.
+  • In  client.py , the LLM + LangChain adapter is the orchestrator: they translate your English   
+  queries into the same under-the-hood HTTP POST calls automatically.
+  ──────

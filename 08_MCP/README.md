@@ -200,3 +200,41 @@ Add at least one new tool to the cat shop MCP server (e.g., `search_products`, `
 Build a custom MCP client that connects to the cat shop server over Streamable HTTP, authenticates via OAuth, and orchestrates a multi-step shopping flow (browse → add to cart → checkout). Compare the developer experience of MCP-based tool integration vs. traditional REST API calls.
 
 Include your findings and a demo in your Loom video.
+
+ ### 1. Developer Experience (DX) Comparison Matrix                                               
+                                                                                                   
+   Dimension               │ MCP Tool Integration              │ Traditional REST API Calls
+  ─────────────────────────┼───────────────────────────────────┼───────────────────────────────────
+   Server-Side Setup       │ High DX (Automatic): Standard     │ Low DX (Manual): You must define
+                           │ Python/JS functions are decorated │ routes, HTTP methods, status
+                           │ with  @mcp.tool() . The framework │ codes, Pydantic request/response
+                           │ auto-generates schemas from       │ models, and manual
+                           │ function docstrings and type      │ OpenAPI/Swagger specs.
+                           │ hints.                            │
+   Client-Side Maintenance │ Zero-Maintenance: The client      │ High Maintenance: Every server
+                           │ queries  /mcp  and dynamically    │ update requires manually editing
+                           │ loads all schemas. Adding a new   │ client-side HTTP call methods,
+                           │ tool on the server requires zero  │ path strings, and request
+                           │ code changes on the client.       │ wrappers.
+   LLM / Agent Integration │ Native: MCP payloads are designed │ High Boilerplate: You must
+                           │ specifically for LLMs. Adapters   │ manually write adapter code to
+                           │ (like LangChain's) automatically  │ transform REST request/response
+                           │ map server schemas into LLM       │ shapes into LLM-readable format
+                           │ function calls.                   │ (e.g., OpenAI's function JSON
+                           │                                   │ schemas).
+   Authentication Scope    │ Connection-Level: Auth (like      │ Request-Level: Tokens/credentials
+                           │ OAuth PKCE) is negotiated once    │ must be managed, refreshed, and
+                           │ when establishing the             │ injected into headers manually
+                           │ SSE/Websocket stream. All tool    │ for every individual HTTP
+                           │ requests on the stream are        │ request.
+                           │ automatically authenticated.      │
+   Real-time Streaming     │ Built-in: Supports bidirectional  │ Custom Built: Requires setting up
+                           │ logs, callbacks, and progress     │ separate WebSockets, polling
+                           │ streaming out of the box via the  │ mechanisms, or webhook endpoints
+                           │ Server-Sent Events (SSE) channel. │ to stream progress.
+
+  • Use REST APIs when: Building standard frontend-to-backend web applications (React calling a    
+  database) where deterministic execution and structured resource paths (URLs) are required.       
+  • Use MCP when: Exposing tools, resources, or prompt templates directly to AI Agents, IDE Panels,
+  or LLM-based pipelines. It removes the intermediate documentation layer, allowing servers and    
+  agents to self-assemble.
