@@ -1,4 +1,6 @@
+import json
 import secrets
+import time
 
 from mcp.server.auth.middleware.auth_context import get_access_token
 
@@ -128,10 +130,17 @@ async def checkout() -> dict:
     if not cart["items"]:
         return {"error": "Your cart is empty"}
 
+    order_id = secrets.token_hex(8).upper()
+    
+    # Save order history
+    await db.execute(
+        "INSERT INTO orders (id, username, items_json, total, created_at) VALUES (?, ?, ?, ?, ?)",
+        (order_id, username, json.dumps(cart["items"]), cart["total"], time.time()),
+    )
+    
     await db.execute("DELETE FROM cart_items WHERE username = ?", (username,))
     await db.commit()
 
-    order_id = secrets.token_hex(8).upper()
     return {
         "order_id": order_id,
         "status": "confirmed",
@@ -139,3 +148,26 @@ async def checkout() -> dict:
         "total": cart["total"],
         "message": f"Order {order_id} confirmed! Thanks {username}, your cats will love their new goodies!",
     }
+
+
+@mcp.tool()
+async def get_purchase_history() -> dict:
+    """View your past orders and purchase history."""
+    username = await _get_username()
+    db = await oauth_provider._get_db()
+    cursor = await db.execute(
+        "SELECT id, items_json, total, created_at FROM orders WHERE username = ? ORDER BY created_at DESC",
+        (username,),
+    )
+    rows = await cursor.fetchall()
+    orders = [
+        {
+            "order_id": r[0],
+            "items": json.loads(r[1]),
+            "total": r[2],
+            "date": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(r[3])),
+        }
+        for r in rows
+    ]
+    return {"orders": orders, "order_count": len(orders)}
+
