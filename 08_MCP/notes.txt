@@ -122,3 +122,12 @@ In production environments, the Model Context Protocol (MCP) standardizes client
   • In  client.py , the LLM + LangChain adapter is the orchestrator: they translate your English   
   queries into the same under-the-hood HTTP POST calls automatically.
   ──────
+
+
+  ### Commands:
+https://aghast-galley-clamor.ngrok-free.dev -> http://localhost:6060    
+ISSUER_URL=https://aghast-galley-clamor.ngrok-free.dev .venv/bin/python server.py  
+.venv/bin/python client.py --server-url https://aghast-galley-clamor.ngrok-free.dev
+
+### custom_client.py
+.venv/bin/python custom_client.py --server-url https://aghast-galley-clamor.ngrok-free.dev
