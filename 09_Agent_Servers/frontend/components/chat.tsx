@@ -21,7 +21,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { getMessageText, toolLabel } from "@/lib/messages";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+// Resolve API_URL dynamically to be an absolute URL.
+// The LangGraph React/JS SDK requires a fully qualified absolute URL with a scheme.
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (typeof window !== "undefined"
+    ? `${window.location.origin}/api`
+    : "http://localhost:3000/api");
 
 type StreamMessage = ReturnType<typeof useStream>["messages"][number];
 
