@@ -1,0 +1,147 @@
+#### Option B: Production Setup (Custom Docker Compose)                                                                                                    
+                                                                                                                                                             
+  If you want persistent storage and customized networks on a VPS:                                                                                           
+                                                                                                                                                             
+  1. Generate Dockerfile:                                                                                                                                    
+    uv run langgraph dockerfile Dockerfile
+  
+  2. Build your image:
+    docker build -t langgraph-agent:latest .
+  
+  3. Orchestrate with Docker Compose: Create a  docker-compose.yml  (copy the template from docker_hosting_guide.md) containing PostgreSQL, Redis, and your
+built     
+  image.
+  4. Run the stack:
+    docker compose up -d
+  
+
+
+
+  # Setup docker local
+
+  Searched for files matching `**/*compose*`, no matches
+
+That is great! Since you have **Docker Desktop** installed and running on your Mac, you are fully equipped to spin up this self-hosted production stack locally to see how it works.
+
+Here is the exact step-by-step workflow to get your custom Docker Compose setup running locally.
+
+---
+
+### Step 1: Create the `docker-compose.yml` File
+Create a new file named `docker-compose.yml` in the root of your project folder (`/Users/sriraki/Desktop/CodePractice/ai_practice/AE-CH/AIEC01/09_Agent_Servers/docker-compose.yml`) and paste the following content:
+
+```yaml
+version: '3.8'
+
+services:
+  # 1. LangGraph API Server (Built from your Dockerfile)
+  langgraph-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: langgraph-agent:latest
+    container_name: langgraph-api
+    restart: always
+    ports:
+      - "2024:2024" # Exposes LangGraph API on port 2024
+    environment:
+      # Database and caching backends inside the docker network
+      - DATABASE_URL=postgres://langgraph_user:secure_password@postgres-db:5432/langgraph_db?sslmode=disable
+      - REDIS_URL=redis://redis-cache:6379/0
+      
+      # Graph routing matches your local development setup
+      - LANGSERVE_GRAPHS={"simple_agent": "app.graphs.simple_agent:graph"}
+      
+      # Pass through keys from your host .env file
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_TRACING=${LANGSMITH_TRACING}
+      
+      - OPENAI_CHAT_MODEL=gpt-4o-mini
+      - OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+      - RAG_DATA_DIR=data
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+    volumes:
+      - ./data:/deps/09_Agent_Servers/data # Mount PDF health guidelines
+    networks:
+      - langgraph-network
+
+  # 2. Redis Cache & State Queue
+  redis-cache:
+    image: redis:7-alpine
+    container_name: redis-cache
+    restart: always
+    command: redis-server --save "" --appendonly no # In-memory configuration for high-speed queue
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - langgraph-network
+
+  # 3. PostgreSQL Database for persistent checkpointers
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    restart: always
+    environment:
+      - POSTGRES_USER=langgraph_user
+      - POSTGRES_PASSWORD=secure_password
+      - POSTGRES_DB=langgraph_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persistent volume storage
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langgraph_user -d langgraph_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - langgraph-network
+
+volumes:
+  pgdata: # Durable storage volume for database state
+
+networks:
+  langgraph-network:
+    driver: bridge
+```
+
+---
+
+### Step 2: Start the Production Stack
+Open a terminal in your project root (`09_Agent_Servers/`) and run:
+
+```bash
+docker compose up --build -d
+```
+* **`--build`**: Directs Docker to read your local Dockerfile and compile your dependencies.
+* **`-d`**: Runs all 3 containers (API, DB, Redis) in the background (detached mode).
+
+---
+
+### Step 3: Check Logs to Verify Startup
+To ensure the PostgreSQL migration went through and the API is listening:
+
+```bash
+docker compose logs -f langgraph-api
+```
+*(You should see logs indicating the database was successfully connected, checkpointer migrations were applied, and the server started listening on port `2024`)*.
+
+---
+
+### Step 4: Run the Smoke Test!
+Since this container is now running the production API on `http://localhost:2024`, you can test it directly from your terminal using the smoke test script we verified earlier:
+
+```bash
+uv run python smoke_test.py
+```
+
+If everything is working, the script will connect to your newly spun up Docker containers, stream updates from your agent in real-time, and store the conversation state safely in the PostgreSQL container database!
+
+

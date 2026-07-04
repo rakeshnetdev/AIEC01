@@ -1,0 +1,77 @@
+services:
+  # 1. LangGraph API Server (Built from your Dockerfile)
+  langgraph-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: langgraph-agent:latest
+    container_name: langgraph-api
+    restart: always
+    ports:
+      - "2024:8000" # Maps host port 2024 to container port 8000
+    environment:
+      # Database and caching backends inside the docker network
+      - DATABASE_URI=postgresql://langgraph_user:secure_password@postgres-db:5432/langgraph_db?sslmode=disable
+      - REDIS_URI=redis://redis-cache:6379/0
+      
+      # Graph routing matches your local development setup
+      - 'LANGSERVE_GRAPHS={"simple_agent": "app.graphs.simple_agent:graph"}'
+      
+      # Pass through keys from your host .env file
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_TRACING=${LANGSMITH_TRACING}
+      
+      - OPENAI_CHAT_MODEL=gpt-4o-mini
+      - OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+      - RAG_DATA_DIR=data
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+    volumes:
+      - ./data:/deps/09_Agent_Servers/data # Mount PDF health guidelines
+    networks:
+      - langgraph-network
+
+  # 2. Redis Cache & State Queue
+  redis-cache:
+    image: redis:7-alpine
+    container_name: redis-cache
+    restart: always
+    command: redis-server --save "" --appendonly no # In-memory configuration for high-speed queue
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - langgraph-network
+
+  # 3. PostgreSQL Database for persistent checkpointers
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    restart: always
+    environment:
+      - POSTGRES_USER=langgraph_user
+      - POSTGRES_PASSWORD=secure_password
+      - POSTGRES_DB=langgraph_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persistent volume storage
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langgraph_user -d langgraph_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - langgraph-network
+
+volumes:
+  pgdata: # Durable storage volume for database state
+
+networks:
+  langgraph-network:
+    driver: bridge
