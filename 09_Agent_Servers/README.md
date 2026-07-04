@@ -426,7 +426,9 @@ Follow these steps to prepare and submit your homework assignment:
 
 Why does LangSmith deploy your agent as an API backend only, and why do you still need a separate frontend deployment like Vercel?
 
-#### Answer
+* **Security**: Keeping them separate keeps your private keys (like `OPENAI_API_KEY`) safely locked on the server and completely hidden from the user's browser.
+* **Flexibility**: An API backend can serve multiple frontends at once—like your website, a mobile app, or a Slack bot—without you having to rewrite any agent logic.
+* **Performance**: Vercel is optimized to deliver fast, globally cached user interfaces, while LangSmith/Render is built to handle heavy backend tasks like database tracking and LLM reasoning.
 
 _(insert your answer here)_
 
@@ -436,7 +438,9 @@ Why should the LangSmith API key live in a Next.js API route (server-side) inste
 
 #### Answer
 
-_(insert your answer here)_
+* **Key Exposure Protection**: Putting API keys in the browser means anyone can inspect your page, copy your key, and run up huge bills on your account.
+* **Access Control**: A server-side API route acts as a gatekeeper, letting you add rate limits or user authentication before forwarding requests to your agent.
+* **Secure Environment**: Server environments are fully private and under your control, ensuring sensitive variables are never visible in client network traffic logs.
 
 ## Activity 1: Build a Helpfulness Loop in Production
 
