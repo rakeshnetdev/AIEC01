@@ -1,0 +1,54 @@
+databases:
+  # 1. PostgreSQL Database (Render Free Tier)
+  - name: langgraph-postgres
+    plan: free
+    databaseName: langgraph_db
+    user: langgraph_user
+
+services:
+  # 2. Private Redis Instance (Render Free Tier)
+  - type: redis
+    name: langgraph-redis
+    plan: free
+    ipAllowList: [] # Secures Redis, making it accessible only to services inside your Render account
+
+  # 3. LangGraph API Web Service (Render Free Tier)
+  - type: web
+    name: langgraph-api
+    plan: free
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    envVars:
+      # Automatically bind the database connection string from the database service above
+      - key: DATABASE_URI
+        fromDatabase:
+          name: langgraph-postgres
+          property: connectionString
+
+      # Automatically bind the Redis connection string from the Redis service above
+      - key: REDIS_URI
+        fromService:
+          type: redis
+          name: langgraph-redis
+          property: connectionString
+
+      # Graph Configuration
+      - key: LANGSERVE_GRAPHS
+        value: '{"simple_agent": "app.graphs.simple_agent:graph"}'
+      - key: RAG_DATA_DIR
+        value: "data"
+      - key: OPENAI_CHAT_MODEL
+        value: "gpt-4o-mini"
+      - key: OPENAI_EMBEDDING_MODEL
+        value: "text-embedding-3-small"
+      - key: LANGSMITH_TRACING
+        value: "true"
+
+      # Secrets - Render will prompt you to enter these keys during setup
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: LANGSMITH_API_KEY
+        sync: false
