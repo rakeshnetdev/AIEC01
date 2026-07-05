@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useStream } from "@langchain/react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   Bot,
   FileText,
@@ -21,7 +23,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { getMessageText, toolLabel } from "@/lib/messages";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+// Resolve API_URL dynamically to be an absolute URL.
+// The LangGraph React/JS SDK requires a fully qualified absolute URL with a scheme.
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (typeof window !== "undefined"
+    ? `${window.location.origin}/api`
+    : "http://localhost:3000/api");
 
 type StreamMessage = ReturnType<typeof useStream>["messages"][number];
 
@@ -186,7 +194,7 @@ function MessageRow({ message }: { message: StreamMessage }) {
         </AvatarFallback>
       </Avatar>
 
-      <div className={cn("flex max-w-[80%] flex-col gap-2", isHuman && "items-end")}>
+      <div className={cn("flex max-w-[85%] flex-col gap-2", isHuman && "items-end")}>
         {toolCalls.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {toolCalls.map((tc, idx) => (
@@ -201,13 +209,82 @@ function MessageRow({ message }: { message: StreamMessage }) {
         {text && (
           <div
             className={cn(
-              "rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap",
+              "rounded-2xl px-4 py-2.5 text-sm",
               isHuman
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-foreground"
             )}
           >
-            {text}
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed whitespace-pre-wrap">{children}</p>,
+                a: ({ href, children }) => (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "font-semibold underline underline-offset-4 hover:opacity-80",
+                      isHuman ? "text-primary-foreground" : "text-primary"
+                    )}
+                  >
+                    {children}
+                  </a>
+                ),
+                ul: ({ children }) => <ul className="mb-3 last:mb-0 list-disc pl-5 space-y-1">{children}</ul>,
+                ol: ({ children }) => <ol className="mb-3 last:mb-0 list-decimal pl-5 space-y-1">{children}</ol>,
+                li: ({ children }) => <li className="marker:text-muted-foreground">{children}</li>,
+                h1: ({ children }) => <h1 className="text-base font-bold mt-3 mb-1 first:mt-0">{children}</h1>,
+                h2: ({ children }) => <h2 className="text-sm font-bold mt-2 mb-1 first:mt-0">{children}</h2>,
+                h3: ({ children }) => <h3 className="text-sm font-semibold mt-2 mb-1 first:mt-0">{children}</h3>,
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-muted pl-3 italic my-2">
+                    {children}
+                  </blockquote>
+                ),
+                code: ({ className, children, ...props }) => {
+                  const match = /language-(\w+)/.exec(className || "");
+                  return match ? (
+                    <pre className="my-2 max-w-full overflow-x-auto rounded-lg bg-background/50 border p-3 font-mono text-xs">
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    </pre>
+                  ) : (
+                    <code
+                      className={cn(
+                        "rounded bg-muted/80 px-1 py-0.5 font-mono text-xs font-semibold",
+                        isHuman ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted-foreground/10 text-foreground"
+                      )}
+                      {...props}
+                    >
+                      {children}
+                    </code>
+                  );
+                },
+                table: ({ children }) => (
+                  <div className="my-3 w-full overflow-y-auto">
+                    <table className="w-full border-collapse text-xs">{children}</table>
+                  </div>
+                ),
+                thead: ({ children }) => <thead className="border-b bg-muted/40">{children}</thead>,
+                tbody: ({ children }) => <tbody>{children}</tbody>,
+                tr: ({ children }) => <tr className="border-b transition-colors hover:bg-muted/30">{children}</tr>,
+                th: ({ children }) => (
+                  <th className="px-3 py-1.5 text-left font-semibold text-muted-foreground [&[align=center]]:text-center [&[align=right]]:text-right">
+                    {children}
+                  </th>
+                ),
+                td: ({ children }) => (
+                  <td className="px-3 py-1.5 [&[align=center]]:text-center [&[align=right]]:text-right">
+                    {children}
+                  </td>
+                ),
+              }}
+            >
+              {text}
+            </ReactMarkdown>
           </div>
         )}
       </div>
