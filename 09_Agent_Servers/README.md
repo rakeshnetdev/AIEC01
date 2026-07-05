@@ -444,7 +444,19 @@ Why should the LangSmith API key live in a Next.js API route (server-side) inste
 
 ## Activity 1: Build a Helpfulness Loop in Production
 
-Build an `agent_with_helpfulness` graph that adds a post-response helpfulness check: after the agent answers, a judge model decides whether the response is helpful, and if not, the graph loops back for another attempt (with a safe loop limit). Register it in `langgraph.json`, deploy it, then compare LangSmith traces for queries that pass vs. fail the helpfulness check. Does the retry loop behave differently in Studio vs. production?
+Build an `agent_with_helpfulness` graph that adds a post-response helpfulness check: after the agent answers, a judge model decides whether the response is helpful, and if not, the graph loops back for another attempt (with a safe loop limit). Register it in `langgraph.json`, deploy it, then compare LangSmith traces for queries that pass vs. fail the helpfulness check.
+
+Does the retry loop behave differently in Studio vs. production?
+  • In Studio (Local Dev):                                                                           
+      • You have interactive control. You can step through node execution one node at a time (e.g.,  
+      run  agent , see it hit  judge , pause, and then decide to step through the conditional edge). 
+      • You can fork the execution path at any point in the loop to test different variations or     
+      manually edit the state variables (like forcing  attempts  to a different number or changing   
+      the  is_helpful  boolean) to see how the graph reacts.                                         
+  • In Production:                                                                                   
+      • The loop runs fully autonomously to completion or until it hits a limit (like  MAX_ATTEMPTS =
+      3 ). There is no human intervention or stepping; the engine evaluates the conditions and routes
+      between nodes in milliseconds.    
 
 ## Advanced Activity: Auth and Custom Routes
 

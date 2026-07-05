@@ -15,7 +15,7 @@ services:
       - REDIS_URI=redis://redis-cache:6379/0
       
       # Graph routing matches your local development setup
-      - 'LANGSERVE_GRAPHS={"simple_agent": "app.graphs.simple_agent:graph"}'
+      - 'LANGSERVE_GRAPHS={"simple_agent": "app.graphs.simple_agent:graph", "agent_with_helpfulness": "app.graphs.agent_with_helpfulness:graph"}'
       
       # Pass through keys from your host .env file
       - OPENAI_API_KEY=${OPENAI_API_KEY}
