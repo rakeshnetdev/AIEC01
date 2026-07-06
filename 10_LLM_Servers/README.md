@@ -83,7 +83,13 @@ What is the difference between serverless and dedicated endpoints?
 
 #### ✅ Answer:
 
-_(insert your answer here)_
+| Feature | Serverless Endpoints | Dedicated Endpoints |
+| :--- | :--- | :--- |
+| **Provisioning & Scaling** | Scales automatically on-demand based on traffic. | Fixed capacity that requires manual management or defined policies. |
+| **Cost** | You only pay for what you use; cost is typically zero when idle. | Constant cost; you pay for the active instance regardless of traffic. |
+| **Latency** | May experience "cold start" delays after periods of inactivity. | Consistent and low latency since the instance is always running. |
+| **Throughput** | Handles variable and bursty workloads well. | Provides predictable and high throughput. |
+| **Management Overhead** | Minimal; the service provider manages all infrastructure. | Higher; you are responsible for choosing and controlling instance sizes/types. |
 
 ### ❓ Question #2:
 
@@ -91,7 +97,11 @@ Why is it important to consider token throughput and latency when choosing an LL
 
 #### ✅ Answer:
 
-_(insert your answer here)_
+**Latency (Time to First Token - TTFT):** This is the time it takes for the LLM to start responding. High latency makes the application feel unresponsive, leading to user frustration. A low TTFT ensures the app feels snappy and conversational.
+
+**Token Throughput (Tokens Per Second):** Once the model starts responding, throughput determines how fast the rest of the text is generated. High throughput ensures that users don't have to wait long to read the complete response.
+
+Together, optimizing both ensures that users get immediate feedback and a natural reading experience, which is critical for keeping them engaged.
 
 ## Activity 1: RAGAS Evaluation with Cost Analysis
 
