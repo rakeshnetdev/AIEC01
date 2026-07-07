@@ -109,6 +109,40 @@ Use RAGAS to evaluate your open-source Fireworks AI powered RAG app against an O
 
 Additionally, instrument both pipelines with **LangSmith** to capture token usage and cost per query. Use LangSmith's tracing and cost dashboards to compare the total cost of running each provider at scale. Include your evaluation results, cost breakdown, and analysis in your Loom video.
 
+######### Result ################
+
+### 🎆 Fireworks AI (gpt-oss-20b)                                                             
+                                                                                                 
+    {                                                                                            
+      'context_precision': 1.0000,                                                               
+      'faithfulness': 0.6667,                                                                    
+      'answer_correctness': 0.6497                                                               
+    }                                                                                            
+                                                                                                 
+  ### 🤖 OpenAI ( gpt-4o-mini )                                                                  
+  
+    {
+      'context_precision': 1.0000, 
+      'faithfulness': 1.0000, 
+      'answer_correctness': 0.6701
+    }
+  
+  ### What do these scores mean?
+  
+  1. Context Precision (1.0 vs 1.0): Both scored a perfect  1.0 . This makes sense because we    
+  used a "dummy retriever" that fed them the exact same hardcoded context sentence every time.   
+  The retrieved context was perfectly relevant to the questions.
+  2. Faithfulness (0.66 vs 1.0): OpenAI was perfectly faithful, meaning every single claim it    
+  made could be traced directly back to the dummy context we provided.  Fireworks AI scored lower ( 0. 
+  66 ), meaning it likely hallucinated some outside knowledge about woodchucks into its answer   
+  instead of sticking only to the provided text.
+  3. Answer Correctness (0.64 vs 0.67): Both models scored similarly here. This means the        
+  semantic meaning of their final answers was roughly 65% similar to the ground-truth "reference"
+  answers we hardcoded into the dataset.
+  
+
+  ####### Results end ###########
+
 ## Advanced Activity: Local Models
 
 Swap out the Fireworks AI endpoints for **locally-running open-source models** using [Ollama](https://ollama.com/) or another local inference server of your choice. Run both your embedding model and your chat model locally, and rebuild the RAG pipeline on top of them.
