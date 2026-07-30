@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Codebase Concierge</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Codebase Concierge</h1>
+        <p id="subtitle">Ask anything about this repository.</p>
+      </div>
+      <div class="header-actions">
+        <span id="guardrails" class="badge" title="The agent's tool allowlist"></span>
+        <button id="new-chat" type="button">New chat</button>
+      </div>
+    </header>
+
+    <main id="messages" aria-live="polite">
+      <div class="message assistant">
+        <div class="bubble">
+          Hi — I can read and search this repository. Try
+          <em>“what does this repo do?”</em>, <em>“how do I run the app?”</em>, or
+          <em>“what changed recently?”</em>
+        </div>
+      </div>
+    </main>
+
+    <form id="composer">
+      <input
+        id="input"
+        type="text"
+        autocomplete="off"
+        placeholder="Ask about the codebase…"
+        required
+      />
+      <button id="send" type="submit">Send</button>
+    </form>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
